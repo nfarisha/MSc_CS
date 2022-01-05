@@ -1,0 +1,91 @@
+---
+title: "Feature Selection using Boruta"
+author: "Nor Farisha"
+date: "1/5/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Perform Feature Selection using Boruta Package 
+
+Variable selection is a crucial part of model construction that every analyst should be familiar with. After all, it helps in the development of prediction models that are free of correlated variables, biases, and undesirable noise.
+
+Boruta is an algorithm for selecting features. It functions as a wrapper algorithm for the Random Forest algorithm.
+
+
+
+## Load the Libraries
+
+```{r}
+library(Boruta)
+library(mlbench)
+```
+
+
+## Getting Data
+
+
+For example I will use Sonar, Mines vs Rocks dataset
+Description of data: <https://archive.ics.uci.edu/ml/datasets/Connectionist+Bench+(Sonar,+Mines+vs.+Rocks)>
+
+```{r}
+data("Sonar")
+```
+
+
+
+```{r}
+# Display Data Structure
+
+str(Sonar)
+```
+The dataset contains 208 rows with 61 parameters.The target variable is categorical with 2 class labels (M or R). Briefly this dataset is to predict metal or rock returns from sonar return data.
+
+
+## Feature Selection
+
+```{r}
+set.seed(123)
+fs <- Boruta(Class~., data=Sonar, doTrace=2, maxRuns=500)
+fs
+```
+Based on the algorithm, 33 attributes are important and 20 attributes are unimportant and there are 7 tentative attributes
+
+Tentative Attributes are importance scores that are so close to their best shadow attributes that Boruta can't decide how many random forest runs to execute.
+
+
+
+```{r}
+plot(fs, las=3, cex.axis=0.5)
+```
+
+All predictors are important for variables with a green boxplot. If the boxplots are red, it means they have been rejected. Red and green boxplots represented Z scores. In addition, the yellow colour of the box plot denotes that they are tentative. While blue boxplot resembles shadow attributes as well as correspond to the minimal, average and maximum Z score of a shadow attribute.
+
+
+```{r}
+plotImpHistory(fs)
+```
+plotImpHistory is an alternative plot method for Boruta objects, showing matplot of attribute importances over run.
+
+
+## Tentative Fix
+
+A tentative fix is used to make sure which attributes were important.
+
+TentativeRoughFix will pay attention to tentative attributes that are important or unimportant and classify into accordingly.
+
+```{r}
+TentativeRoughFix(fs)
+```
+
+
+This will shows a complete decision of the variables
+
+```{r}
+attStats(fs)
+```
+
